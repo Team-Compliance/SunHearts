@@ -8,7 +8,7 @@ function ComplianceSun.AddSunHearts(player, amount)
 	local index = mod:GetEntityIndex(player)
         player:AddSoulHearts(amount*2)
 		--if player:GetSoulHearts() % 2 ~= 0 then
-                        --player:AddSoulHearts(2) -- if you already have a half heart, a new full sun heart always replaces it instead of adding another heart
+			--player:AddSoulHearts(2) -- if you already have a half heart, a new full sun heart always replaces it instead of adding another heart
 		--end
 	
 	if player:GetPlayerType() == PlayerType.PLAYER_BETHANY then
@@ -46,7 +46,7 @@ function mod:SunHeartCollision(entity, collider)
 				if player:GetPlayerType() ~= PlayerType.PLAYER_THELOST and player:GetPlayerType() ~= PlayerType.PLAYER_THELOST_B then
 					ComplianceSun.AddSunHearts(player, 1)
 				end
-                                SFXManager():Play(492, 1, 2, false, 1, 0)
+				sfx:Play(492, 1, 2, false, 1, 0)
 				entity.Velocity = Vector.Zero
 				entity.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
 				entity:GetSprite():Play("Collect", true)
@@ -146,35 +146,39 @@ function mod:onRender(shadername)
 	if shadername ~= "Sun Hearts" then return end
 	if mod:shouldDeHook() then return end
 	local isJacobFirst = false
+	local pNum = 1
 	for i = 0, game:GetNumPlayers() - 1 do
 		local player = Isaac.GetPlayer(i)
-		local index = mod:GetEntityIndex(player)
-		if i == 0 and player:GetPlayerType() == PlayerType.PLAYER_JACOB then
-			isJacobFirst = true
-		end
-		
-		if (player:GetPlayerType() == PlayerType.PLAYER_LAZARUS_B or player:GetPlayerType() == PlayerType.PLAYER_LAZARUS2_B) then
-			if player:GetOtherTwin() then
-				if mod.DataTable[index].i and mod.DataTable[index].i == i then
+		if player.Parent == nil then
+			local index = mod:GetEntityIndex(player)
+			if i == 0 and player:GetPlayerType() == PlayerType.PLAYER_JACOB then
+				isJacobFirst = true
+			end
+			
+			if (player:GetPlayerType() == PlayerType.PLAYER_LAZARUS_B or player:GetPlayerType() == PlayerType.PLAYER_LAZARUS2_B) then
+				if player:GetOtherTwin() then
+					if mod.DataTable[index].i and mod.DataTable[index].i == i then
+						mod.DataTable[index].i = nil
+					end
+					if not mod.DataTable[index].i then
+						local otherIndex = mod:GetEntityIndex(player:GetOtherTwin())
+						mod.DataTable[otherIndex].i = i
+					end
+				elseif mod.DataTable[index].i then
 					mod.DataTable[index].i = nil
 				end
-				if not mod.DataTable[index].i then
-					local otherIndex = mod:GetEntityIndex(player:GetOtherTwin())
-					mod.DataTable[otherIndex].i = i
-				end
-			elseif mod.DataTable[index].i then
-				mod.DataTable[index].i = nil
 			end
-		end
-		if player:GetPlayerType() ~= PlayerType.PLAYER_THESOUL_B and not player.Parent and not mod.DataTable[index].i then
-			if player:GetPlayerType() == PlayerType.PLAYER_ESAU and isJacobFirst then
-				renderingHearts(player,5)	
-			elseif player:GetPlayerType() ~= PlayerType.PLAYER_ESAU then
-				renderingHearts(player,i+1)
+			if player:GetPlayerType() ~= PlayerType.PLAYER_THESOUL_B and not mod.DataTable[index].i then
+				if player:GetPlayerType() == PlayerType.PLAYER_ESAU and isJacobFirst then
+					renderingHearts(player,5)	
+				elseif player:GetPlayerType() ~= PlayerType.PLAYER_ESAU then
+					renderingHearts(player,pNum)
+					pNum = pNum + 1
+				end
+				if pNum > 4 then break end
 			end
 		end
 	end
-
 end
 mod:AddCallback(ModCallbacks.MC_GET_SHADER_PARAMS, mod.onRender)
 
@@ -189,10 +193,10 @@ function mod:SunBlock(entity, damage, flag, source, cooldown)
 				if not ((flag & DamageFlag.DAMAGE_RED_HEARTS == DamageFlag.DAMAGE_RED_HEARTS or player:HasTrinket(TrinketType.TRINKET_CROW_HEART)) and player:GetHearts() > 0) then
 					local isLastSunEternal = mod.DataTable[index].ComplianceSunHeart == 1 and player:GetSoulHearts() == 1 and player:GetEffectiveMaxHearts() == 0 and player:GetEternalHearts() > 0
 					if (mod.DataTable[index].ComplianceSunHeart ~= 0) and not isLastSunEternal then
-						--local NumSoulHearts = player:GetSoulHearts() - (1 - player:GetSoulHearts() % 2)
-                                                --if damage == 1 then
-						player:AddSoulHearts(-1)
-                                                --end
+					--local NumSoulHearts = player:GetSoulHearts() - (1 - player:GetSoulHearts() % 2)
+					--if damage == 1 then
+					player:AddSoulHearts(-1)
+					--end
 					end
 					--Checking for Half Sun and Eternal heart
 					if not isLastSunEternal  then
@@ -228,10 +232,10 @@ function mod:HeartHandling(player)
 	end
 	local index = mod:GetEntityIndex(player)
 	if mod.DataTable[index].ComplianceSunHeart > 0 then
-                if ComplianceSun.GetSunHearts(player) > player:GetSoulHearts()/2 or ComplianceSun.GetSunHearts(player) > player:GetHeartLimit() then
-                 ComplianceSun.AddSunHearts(player,-1)
-                 player:AddSoulHearts(2)
-                end
+		if ComplianceSun.GetSunHearts(player) > player:GetSoulHearts()/2 or ComplianceSun.GetSunHearts(player) * 2 > player:GetHeartLimit() then
+			ComplianceSun.AddSunHearts(player,-1)
+			player:AddSoulHearts(2)
+		end
 		mod.DataTable[index].ComplianceSunHeart = mod.DataTable[index].ComplianceSunHeart > player:GetSoulHearts() and player:GetSoulHearts() or mod.DataTable[index].ComplianceSunHeart
 		local heartIndex = math.ceil(mod.DataTable[index].ComplianceSunHeart)
 		for i=0, heartIndex do
@@ -243,11 +247,11 @@ function mod:HeartHandling(player)
 				end
 				local complh = ComplianceSun.GetSunHearts(player)
 				ComplianceSun.AddSunHearts(player,-complh)
-                                if ComplianceSun.GetSunHearts(player) > (player:GetHeartLimit() - player:GetEffectiveMaxHearts()) then
-				ComplianceSun.AddSunHearts(player,complh) 
-                                else
-                                ComplianceSun.AddSunHearts(player,complh-1) 
-                                end
+				if ComplianceSun.GetSunHearts(player) > (player:GetHeartLimit() - player:GetEffectiveMaxHearts()) then
+					ComplianceSun.AddSunHearts(player,complh) 
+				else
+					ComplianceSun.AddSunHearts(player,complh-1) 
+				end
 				break
 				--player:AddSoulHearts(-mod.DataTable[index].ComplianceSunHeart)
 				--player:AddBlackHearts(mod.DataTable[index].ComplianceSunHeart)
@@ -267,7 +271,7 @@ function mod:HeartHandling(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.HeartHandling)
 
-function mod:PreEternalSpawn(entityType, variant, subType, position, velocity, spawner, seed)
+function mod:PreSunSpawn(heart)
 	local rng = RNG()
 	if heart.SubType == HeartSubType.HEART_SOUL and heart:GetSprite():IsPlaying("Appear") then
 		rng:SetSeed(heart.InitSeed, 35)
@@ -277,12 +281,26 @@ function mod:PreEternalSpawn(entityType, variant, subType, position, velocity, s
 	end
 end
 
-mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, mod.PreEternalSpawn, PickupVariant.PICKUP_HEART)
+mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, mod.PreSunSpawn, PickupVariant.PICKUP_HEART)
+
+--hud and sfx reactions in all slots
+local function ChargeItem(player)
+	
+end
 
 function mod:SunClear(rng, pos)
 	for i=0, Game():GetNumPlayers()-1 do
 		local player = Isaac.GetPlayer(i)
-		player:SetActiveCharge(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY)+ComplianceSun.GetSunHearts(player))
+		for slot = 0,2 do
+			if player:GetActiveItem(slot) ~= nil then
+				local item = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
+				local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
+				local battery = item.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
+				local tocharge = Compliance.GetSunHearts(player) <= (battery - charge) and Compliance.GetSunHearts(player) or (battery - charge)
+				player:SetActiveCharge(charge+tocharge,slot)
+				Game():GetHUD():FlashChargeBar(player,slot)
+			end
+		end
 	end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, mod.SunClear)
@@ -341,9 +359,9 @@ function mod:SpriteChange(entity)
 			spritename = spritename.."_sussy" 
 		end
 		spritename = spritename..".png"
-		for i = 0,2 do
-			sprite:ReplaceSpritesheet(i,spritename)
-		end
+		
+		sprite:ReplaceSpritesheet(0,spritename)
+		
 		sprite:LoadGraphics()
 	end
 end
