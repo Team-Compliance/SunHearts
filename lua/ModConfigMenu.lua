@@ -89,31 +89,4 @@ if ModConfigMenu then
         Info = "Sun heart's rarity."
     })
 	
-	ModConfigMenu.AddSetting(SunMCM, "Settings",
-	{
-		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function()
-			local current = false
-			if mod.optionContrition == 1 then
-				current = true
-			end
-			return current
-		end,
-		Display = function()
-			local onOff = "Off"
-			if mod.optionContrition == 1 then
-				onOff = "On"
-			end
-			return "Act of Contrition gives Sun Heart: " .. onOff
-		end,
-		OnChange = function(currentBool)
-			if currentBool == true then
-				mod.optionContrition = 1
-			else
-				mod.optionContrition = 2
-			end
-		end,
-		Info = "Replaces Act of Contrition's Eternal Heart with an Sun Heart, like in Antibirth."
-	})
-	
 end
