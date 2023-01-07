@@ -25,7 +25,7 @@ mod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, mod.StaticHP, 238)
 function mod:SunClotSpawn(baby)
 	local player = baby.Player
 	if baby.SubType == 30 then
-		if ComplianceSun.GetSunHearts(player) % 2 == 0 then
+		if ComplianceSun.GetSunHeartsNum(player) % 2 == 0 then
 			SFXManager():Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
 			local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
 			shatterSPR.PlaybackSpeed = 2

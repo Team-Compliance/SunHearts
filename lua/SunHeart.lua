@@ -13,7 +13,7 @@ CustomHealthAPI.Library.RegisterSoulHealth(
     {
         AnimationFilename = "gfx/ui/ui_remix_hearts.anm2",
         AnimationName = {"SunHeartHalf", "SunHeartFull"},
-        SortOrder = 150,
+        SortOrder = 149,
         AddPriority = 175,
         HealFlashRO = 240/255, 
         HealFlashGO = 240/255,
@@ -23,7 +23,7 @@ CustomHealthAPI.Library.RegisterSoulHealth(
         PickupEntities = {
             {ID = EntityType.ENTITY_PICKUP, Var = PickupVariant.PICKUP_HEART, Sub = HeartSubType.HEART_SUN}
         },
-        SumptoriumSubType = 21,  -- immortal heart clot
+        SumptoriumSubType = 30,  -- immortal heart clot
         SumptoriumSplatColor = Color(1.00, 1.00, 1.00, 1.00, 0.00, 0.00, 0.00),
         SumptoriumTrailColor = Color(1.00, 1.00, 1.00, 1.00, 0.00, 0.00, 0.00),
         SumptoriumCollectSoundSettings = {
@@ -78,17 +78,15 @@ end
 function mod:SunHeartCollision(entity, collider)
 	if collider.Type == EntityType.ENTITY_PLAYER then
 		local player = collider:ToPlayer()
+		if player.Parent ~= nil then return entity:IsShopItem() end
 		if player:GetPlayerType() == PlayerType.PLAYER_THESOUL_B then
 			player = player:GetMainTwin()
 		end
-		local data = mod.DataTable[mod:GetEntityIndex(player)]
-		
-		if data.ComplianceSunHeart < (player:GetHeartLimit() - player:GetEffectiveMaxHearts()) then
+		if ComplianceSun.CanPickSunHearts(player) then
 			if entity.SubType == HeartSubType.HEART_SUN then
 				if player:GetPlayerType() ~= PlayerType.PLAYER_THELOST and player:GetPlayerType() ~= PlayerType.PLAYER_THELOST_B then
-					ComplianceSun.AddSunHearts(player, 1)
+					ComplianceSun.AddSunHearts(player, 2)
 				end
-				sfx:Play(492, 1, 2, false, 1, 0)
 				entity.Velocity = Vector.Zero
 				entity.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
 				entity:GetSprite():Play("Collect", true)
@@ -124,7 +122,7 @@ function mod:SunHeartIFrames(player)
 		player:GetData().SunHeartDamage = nil
 	end
 end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.ImmortalHeartIFrames)
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.SunHeartIFrames)
 
 function mod:SunClear(rng, pos)
 	for i=0, Game():GetNumPlayers()-1 do
@@ -132,7 +130,7 @@ function mod:SunClear(rng, pos)
 		for slot = 0,2 do
 			if player:GetActiveItem(slot) ~= nil then
 				local item = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
-				if item.ChargeType ~= 2 then
+				if item and item.ChargeType ~= 2 then
 					local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
 					local battery = item.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
 					local tocharge = ComplianceSun.GetSunHeartsNum(player) <= (battery - charge) and ComplianceSun.GetSunHeartsNum(player) or (battery - charge)
