@@ -129,13 +129,15 @@ function mod:SunClear(rng, pos)
 		local player = Isaac.GetPlayer(i)
 		for slot = 0,2 do
 			if player:GetActiveItem(slot) ~= nil then
-				local item = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
-				if item and item.ChargeType ~= 2 then
+				local itemConfig = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
+				if itemConfig and itemConfig.ChargeType ~= 2 then
 					local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
-					local battery = item.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
+					local battery = itemConfig.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
 					local tocharge = ComplianceSun.GetSunHeartsNum(player) <= (battery - charge) and ComplianceSun.GetSunHeartsNum(player) or (battery - charge)
-					player:SetActiveCharge(charge+tocharge,slot)
-					Game():GetHUD():FlashChargeBar(player,slot)
+					if charge < battery then
+						player:SetActiveCharge(charge+tocharge,slot)
+						game:GetHUD():FlashChargeBar(player,slot)
+					end
 				end
 			end
 		end
