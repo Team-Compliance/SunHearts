@@ -13,12 +13,12 @@ CustomHealthAPI.Library.RegisterSoulHealth(
     {
         AnimationFilename = "gfx/ui/ui_remix_hearts.anm2",
         AnimationName = {"SunHeartHalf", "SunHeartFull"},
-        SortOrder = 149,
-        AddPriority = 175,
+        SortOrder = 100,
+        AddPriority = 125,
         HealFlashRO = 240/255, 
         HealFlashGO = 240/255,
         HealFlashBO = 240/255,
-        MaxHP = 2,
+        MaxHP = 1,
         PrioritizeHealing = true,
         PickupEntities = {
             {ID = EntityType.ENTITY_PICKUP, Var = PickupVariant.PICKUP_HEART, Sub = HeartSubType.HEART_SUN}
@@ -57,8 +57,6 @@ CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callb
 			sfx:Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
 			local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
 			shatterSPR.PlaybackSpeed = 2
-		else
-			player:GetData().SunHeartDamage = true
 		end
 	end
 end)
@@ -108,21 +106,6 @@ function mod:PreEternalSpawn(id, var, subtype, pos, vel, spawner, seed)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, mod.PreEternalSpawn)
-
-function mod:SunHeartIFrames(player)
-	if player:GetData().SunHeartDamage then
-		local cd = 20
-		player:ResetDamageCooldown()
-		player:SetMinDamageCooldown(cd)
-		if player:GetPlayerType() == PlayerType.PLAYER_THESOUL_B or player:GetPlayerType() == PlayerType.PLAYER_ESAU
-		or player:GetPlayerType() == PlayerType.PLAYER_JACOB then
-			player:GetOtherTwin():ResetDamageCooldown()
-			player:GetOtherTwin():SetMinDamageCooldown(cd)
-		end
-		player:GetData().SunHeartDamage = nil
-	end
-end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.SunHeartIFrames)
 
 function mod:SunClear(rng, pos)
 	for i=0, Game():GetNumPlayers()-1 do
