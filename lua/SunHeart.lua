@@ -1,7 +1,7 @@
 local mod = ComplianceSun
 local game = Game()
 local sfx = SFXManager()
-local screenHelper = require("lua.screenhelper")
+local sunSFX = Isaac.GetSoundIdByName("PickupSun")
 -- API functions --
 
 if CustomHealthAPI and CustomHealthAPI.Library and CustomHealthAPI.Library.UnregisterCallbacks then
@@ -12,7 +12,7 @@ CustomHealthAPI.Library.RegisterSoulHealth(
     "HEART_SUN",
     {
         AnimationFilename = "gfx/ui/ui_remix_hearts.anm2",
-        AnimationName = {"SunHeartHalf", "SunHeartFull"},
+        AnimationName = {"SunHeartFull"},
         SortOrder = 100,
         AddPriority = 125,
         HealFlashRO = 240/255, 
@@ -54,9 +54,9 @@ end)
 CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callbacks.POST_HEALTH_DAMAGED, 0, function(player, flags, key, hpDamaged, wasDepleted, wasLastDamaged)
 	if key == "HEART_SUN" then
 		if wasDepleted then
-			sfx:Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
-			local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
-			shatterSPR.PlaybackSpeed = 2
+			--sfx:Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
+			--local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
+			--shatterSPR.PlaybackSpeed = 2
 		end
 	end
 end)
@@ -88,6 +88,7 @@ function mod:SunHeartCollision(entity, collider)
 				entity.Velocity = Vector.Zero
 				entity.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
 				entity:GetSprite():Play("Collect", true)
+				sfx:Play(sunSFX,1,0)
 				entity:Die()
 				return true
 			end
