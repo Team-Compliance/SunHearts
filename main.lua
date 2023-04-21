@@ -5,7 +5,7 @@ local json = require("json")
 
 HeartSubType.HEART_SUN = 910
 
-mod.savedata = {DataTable = {},CustomHealthAPISave = nil, DSS = {}}
+mod.savedata = {DataTable = {},CustomHealthAPISave = nil, DSS = {}, Pickups = {}}
 mod.SunSplash = Sprite()
 mod.SunSplash:Load("gfx/ui/ui_remix_hearts.anm2",true)
 
@@ -76,6 +76,7 @@ function mod:OnSave(isSaving)
 	local save = {}
 	if isSaving then
 		save.PlayerData = mod.savedata.DataTable
+		save.Pickups = mod.savedata.Pickups
 	end
 	save.DSS = mod.savedata.DSS
 	save.SpriteStyle = mod.optionNum
@@ -90,17 +91,23 @@ function mod:GetLoadData(isLoading)
 	if mod:HasData() then
 		local save = json.decode(mod:LoadData())
 		if isLoading then
-			mod.savedata.DataTable = save.PlayerData
+			if save.PlayerData then
+				mod.savedata.DataTable = save.PlayerData
+			end
+			if save.Pickups then
+				mod.savedata.Pickups = save.Pickups
+			end
 		else
 			mod.savedata.DataTable = {}
-			mod.savedata.CustomHealthAPISave = nil
-			mod.savedata.DSS = {}
+			mod.savedata.Pickups = {}
 		end
 
 		mod.savedata.DSS = save.DSS and save.DSS or {}
 		mod.optionNum = save.SpriteStyle and save.SpriteStyle or 1
 		mod.optionChance = save.AppearanceChance and save.AppearanceChance or 50
 	else
+		mod.savedata.DataTable = {}
+		mod.savedata.Pickups = {}
 		mod.optionNum = 1
 		mod.optionChance = 50
 		mod.savedata.DSS = {}
