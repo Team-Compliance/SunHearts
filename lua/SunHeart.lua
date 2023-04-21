@@ -73,6 +73,10 @@ function ComplianceSun.CanPickSunHearts(player)
 	return CustomHealthAPI.Library.CanPickKey(player, "HEART_SUN")
 end
 
+local function IsLost(player)
+	return player:GetPlayerType() == PlayerType.PLAYER_THELOST or player:GetPlayerType() == PlayerType.PLAYER_THELOST_B
+end
+
 function mod:SunHeartCollision(pickup, collider)
 	if collider.Type == EntityType.ENTITY_PLAYER then
 		local player = collider:ToPlayer()
@@ -90,7 +94,7 @@ function mod:SunHeartCollision(pickup, collider)
 					pickup:Die()
 				else
 					if pickup.Price >= 0 or pickup.Price == PickupPrice.PRICE_FREE or pickup.Price == PickupPrice.PRICE_SPIKES then
-						if pickup.Price == PickupPrice.PRICE_SPIKES then
+						if pickup.Price == PickupPrice.PRICE_SPIKES and not IsLost(player) then
 							local tookDamage = player:TakeDamage(2.0, 268435584, EntityRef(nil), 30)
 							if not tookDamage then
 								return pickup:IsShopItem()
@@ -105,7 +109,7 @@ function mod:SunHeartCollision(pickup, collider)
 						player:AnimatePickup(pickup:GetSprite(), true)
 					end
 				end
-				if player:GetPlayerType() ~= PlayerType.PLAYER_THELOST and player:GetPlayerType() ~= PlayerType.PLAYER_THELOST_B then
+				if not IsLost(player) then
 					ComplianceSun.AddSunHearts(player, 2)
 				end
 				sfx:Play(sunSFX,1,0)
