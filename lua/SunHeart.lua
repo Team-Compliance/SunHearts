@@ -80,11 +80,11 @@ end
 function mod:SunHeartCollision(pickup, collider)
 	if collider.Type == EntityType.ENTITY_PLAYER then
 		local player = collider:ToPlayer()
-		if player.Parent ~= nil then return pickup:IsShopItem() end
 		if player:GetPlayerType() == PlayerType.PLAYER_THESOUL_B then
 			player = player:GetMainTwin()
 		end
 		if pickup.SubType == HeartSubType.HEART_SUN then
+			if player.Parent ~= nil then return pickup:IsShopItem() end
 			if pickup:IsShopItem() and (pickup.Price > 0 and player:GetNumCoins() < pickup.Price or not player:IsExtraAnimationFinished()) then
 				return true
 			end
