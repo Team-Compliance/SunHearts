@@ -161,7 +161,7 @@ function mod:SunClear(rng, pos)
 	for i=0, Game():GetNumPlayers()-1 do
 		local player = Isaac.GetPlayer(i)
 		for slot = 0,2 do
-			if player:GetActiveItem(slot) ~= nil then
+			if player:GetActiveItem(slot) ~= nil and player:GetActiveItem(slot) ~= CollectibleType.COLLECTIBLE_ALABASTER_BOX then
 				local itemConfig = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
 				if itemConfig and itemConfig.ChargeType ~= 2 then
 					local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
