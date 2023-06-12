@@ -1,5 +1,6 @@
 local mod = ComplianceSun
 local game = Game()
+local sunSFX = Isaac.GetSoundIdByName("PickupSun")
 
 function mod:StaticHP(clot)
 	if clot.SubType == 30 then
@@ -20,24 +21,29 @@ function mod:StaticHP(clot)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, mod.StaticHP, 238)
 
-function mod:SunClotClear(rng, pos)
-	if #Isaac.FindByType(3,238,30) > 0 then	
-		for i=0, game:GetNumPlayers()-1 do
-			local player = Isaac.GetPlayer(i)
-			for slot = 0,2 do
-				if player:GetActiveItem(slot) ~= nil then
-					local item = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
-					if item.ChargeType ~= 2 and ComplianceSun.GetSunHeartsNum(player) == 0 then
-						local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
-						local battery = item.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
-						if charge < battery then
-							player:SetActiveCharge(charge+1,slot)
-							game:GetHUD():FlashChargeBar(player,slot)
+---@param clot Entity
+function mod:SunClotDeath(clot)
+	if clot.Variant == FamiliarVariant.BLOOD_BABY and clot.SubType == 30 then
+		local player = clot:ToFamiliar().Player
+		for slot = 0,2 do
+			if player:GetActiveItem(slot) ~= nil and player:GetActiveItem(slot) ~= CollectibleType.COLLECTIBLE_ALABASTER_BOX then
+				local itemConfig = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
+				if itemConfig and itemConfig.ChargeType ~= 2 then
+					local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
+					local battery = itemConfig.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
+					if charge < battery then
+						if itemConfig.ChargeType == 1 then
+							player:FullCharge(slot)
+						else
+							player:SetActiveCharge(charge + 1, slot)
+							game:GetHUD():FlashChargeBar(player, slot)
 						end
+						SFXManager():Play(sunSFX,1,0)
+						break
 					end
 				end
 			end
 		end
 	end
 end
-mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, mod.SunClotClear)
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, mod.SunClotDeath, EntityType.ENTITY_FAMILIAR)

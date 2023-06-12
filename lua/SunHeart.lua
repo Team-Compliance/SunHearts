@@ -45,18 +45,12 @@ CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callb
 	return mod.savedata.CustomHealthAPISave
 end)
 
-CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callbacks.PRE_HEALTH_DAMAGED, 0, function(player, flags, key, hpDamaged, otherKey, otherHPDamaged, amountToRemove)
-	if otherKey == "HEART_SUN" then
-		return 1
-	end
-end)
-
 CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callbacks.POST_HEALTH_DAMAGED, 0, function(player, flags, key, hpDamaged, wasDepleted, wasLastDamaged)
 	if key == "HEART_SUN" then
 		if wasDepleted then
-			--sfx:Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
-			--local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
-			--shatterSPR.PlaybackSpeed = 2
+			sfx:Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
+			local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
+			shatterSPR.PlaybackSpeed = 2
 		end
 	end
 end)
@@ -160,16 +154,26 @@ mod:AddCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, mod.PreEternalSpawn)
 function mod:SunClear(rng, pos)
 	for i=0, Game():GetNumPlayers()-1 do
 		local player = Isaac.GetPlayer(i)
-		for slot = 0,2 do
-			if player:GetActiveItem(slot) ~= nil and player:GetActiveItem(slot) ~= CollectibleType.COLLECTIBLE_ALABASTER_BOX then
-				local itemConfig = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
-				if itemConfig and itemConfig.ChargeType ~= 2 then
-					local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
-					local battery = itemConfig.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
-					local tocharge = ComplianceSun.GetSunHeartsNum(player) <= (battery - charge) and ComplianceSun.GetSunHeartsNum(player) or (battery - charge)
-					if charge < battery then
-						player:SetActiveCharge(charge+tocharge,slot)
-						game:GetHUD():FlashChargeBar(player,slot)
+		if ComplianceSun.GetSunHeartsNum(player) > 0 then
+			for slot = 0,2 do
+				if player:GetActiveItem(slot) ~= nil and player:GetActiveItem(slot) ~= CollectibleType.COLLECTIBLE_ALABASTER_BOX then
+					local itemConfig = Isaac.GetItemConfig():GetCollectible(player:GetActiveItem(slot))
+					if itemConfig and itemConfig.ChargeType ~= 2 then
+						local charge = player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
+						local battery = itemConfig.MaxCharges * (player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1)
+						local tocharge = math.min(ComplianceSun.GetSunHeartsNum(player) / 2, battery - charge)
+						local newcharge = 0
+						for j = 1, tocharge do
+							if rng:RandomInt(2) == 1 then
+								newcharge = newcharge + 1
+							end
+						end
+						if charge < battery and newcharge > 0 then
+							player:SetActiveCharge(charge + newcharge, slot)
+							game:GetHUD():FlashChargeBar(player, slot)
+							sfx:Play(sunSFX,1,0)
+							break
+						end
 					end
 				end
 			end
