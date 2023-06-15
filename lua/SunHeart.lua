@@ -49,8 +49,9 @@ CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callb
 	if key == "HEART_SUN" then
 		if wasDepleted then
 			sfx:Play(Isaac.GetSoundIdByName("SunBreak"),1,0)
-			--local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
-			--shatterSPR.PlaybackSpeed = 2
+			local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.IMPACT, 0, player.Position + Vector(0, 0), Vector.Zero, nil):ToEffect():GetSprite()
+			shatterSPR:Play("Yellow",true)
+			shatterSPR.Offset = Vector(0, -15)
 		end
 	end
 end)
@@ -172,6 +173,8 @@ function mod:SunClear(rng, pos)
 							player:SetActiveCharge(charge + newcharge, slot)
 							game:GetHUD():FlashChargeBar(player, slot)
 							sfx:Play(sunSFX,1,0)
+							local BatteryEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.BATTERY, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect()
+							BatteryEffect:GetSprite().Offset = Vector(0, -15)
 							break
 						end
 					end

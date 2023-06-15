@@ -39,6 +39,8 @@ function mod:SunClotDeath(clot)
 							game:GetHUD():FlashChargeBar(player, slot)
 						end
 						SFXManager():Play(sunSFX,1,0)
+						local BatteryEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.BATTERY, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect()
+						BatteryEffect:GetSprite().Offset = Vector(0, -15)
 						break
 					end
 				end
