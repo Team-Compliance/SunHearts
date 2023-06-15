@@ -3,6 +3,9 @@
 		<sample weight="1" path="pickup_sunheart.wav" />
 		<sample weight="1" path="pickup_sunheart_2.wav" />
 	</sound>
+    <sound name="SunBreak">
+		<sample weight="1" path="sunheart_break.wav" />
+	</sound>
 	<sound name="deadseascrolls_pop">
         <sample weight="1" path="deadseascrolls/pop.wav"/>
     </sound>

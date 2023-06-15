@@ -48,9 +48,9 @@ end)
 CustomHealthAPI.Library.AddCallback("ComplianceSun", CustomHealthAPI.Enums.Callbacks.POST_HEALTH_DAMAGED, 0, function(player, flags, key, hpDamaged, wasDepleted, wasLastDamaged)
 	if key == "HEART_SUN" then
 		if wasDepleted then
-			sfx:Play(Isaac.GetSoundIdByName("SunHeartBreak"),1,0)
-			local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
-			shatterSPR.PlaybackSpeed = 2
+			sfx:Play(Isaac.GetSoundIdByName("SunBreak"),1,0)
+			--local shatterSPR = Isaac.Spawn(EntityType.ENTITY_EFFECT, 904, 0, player.Position + Vector(0, 1), Vector.Zero, nil):ToEffect():GetSprite()
+			--shatterSPR.PlaybackSpeed = 2
 		end
 	end
 end)
