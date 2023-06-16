@@ -56,7 +56,6 @@ end
 
 local scriptList = {
 	"customhealthapi.core",
-	"ModConfigMenu",
 	"SunHeart",
 	"SunClot",
 	"deadseascrolls",
@@ -104,12 +103,12 @@ function mod:GetLoadData(isLoading)
 
 		mod.savedata.DSS = save.DSS and save.DSS or {}
 		mod.optionNum = save.SpriteStyle and save.SpriteStyle or 1
-		mod.optionChance = save.AppearanceChance and save.AppearanceChance or 50
+		mod.optionChance = save.AppearanceChance and save.AppearanceChance or 20
 	else
 		mod.savedata.DataTable = {}
 		mod.savedata.Pickups = {}
 		mod.optionNum = 1
-		mod.optionChance = 50
+		mod.optionChance = 20
 		mod.savedata.DSS = {}
 	end
 end
